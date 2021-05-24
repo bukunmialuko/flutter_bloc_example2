@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class LoginView extends StatelessWidget {
-  const LoginView({Key key}) : super(key: key);
+  // const LoginView({Key key}) : super(key: key);
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -12,6 +14,7 @@ class LoginView extends StatelessWidget {
 
   Widget _loginForm() {
     return Form(
+      key: _formKey,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
@@ -34,6 +37,7 @@ class LoginView extends StatelessWidget {
         icon: Icon(Icons.person),
         hintText: "Username",
       ),
+      validator: (value) => null,
     );
   }
 
@@ -44,6 +48,7 @@ class LoginView extends StatelessWidget {
         icon: Icon(Icons.security),
         hintText: "Password",
       ),
+      validator: (value) => null,
     );
   }
 
