@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc_example2/auth/auth_repository.dart';
+import 'package:flutter_bloc_example2/auth/form_submission_status.dart';
+import 'package:flutter_bloc_example2/auth/login/login_bloc.dart';
+import 'package:flutter_bloc_example2/auth/login/login_event.dart';
+import 'package:flutter_bloc_example2/auth/login/login_state.dart';
 
 class LoginView extends StatelessWidget {
   // const LoginView({Key key}) : super(key: key);
@@ -8,8 +14,12 @@ class LoginView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _loginForm(),
-    );
+        body: BlocProvider(
+      create: (context) => LoginBloc(
+        authRepo: context.read<AuthRepository>(),
+      ),
+      child: _loginForm(),
+    ));
   }
 
   Widget _loginForm() {
@@ -32,30 +42,54 @@ class LoginView extends StatelessWidget {
   }
 
   Widget _usernameField() {
-    return TextFormField(
-      decoration: InputDecoration(
-        icon: Icon(Icons.person),
-        hintText: "Username",
-      ),
-      validator: (value) => null,
+    return BlocBuilder<LoginBloc, LoginState>(
+      builder: (context, state) {
+        return TextFormField(
+          decoration: InputDecoration(
+            icon: Icon(Icons.person),
+            hintText: "Username",
+          ),
+          validator: (value) => state.isValidUsername ? null : "Username is too short",
+          onChanged: (value) => context.read<LoginBloc>().add(
+                LoginUsernameChanged(username: value),
+              ),
+        );
+      },
     );
   }
 
   Widget _passwordField() {
-    return TextFormField(
-      obscureText: true,
-      decoration: InputDecoration(
-        icon: Icon(Icons.security),
-        hintText: "Password",
-      ),
-      validator: (value) => null,
+    return BlocBuilder<LoginBloc, LoginState>(
+      builder: (context, state) {
+        return TextFormField(
+          obscureText: true,
+          decoration: InputDecoration(
+            icon: Icon(Icons.security),
+            hintText: "Password",
+          ),
+          validator: (value) => state.isValidPassword ? null : "Password is too short",
+          onChanged: (value) => context.read<LoginBloc>().add(
+                LoginPasswordChanged(password: value),
+              ),
+        );
+      },
     );
   }
 
   Widget _loginButton() {
-    return ElevatedButton(
-      onPressed: () {},
-      child: Text("Login"),
+    return BlocBuilder<LoginBloc, LoginState>(
+      builder: (context, state) {
+        return state.formStatus is FormSubmitting
+            ? CircularProgressIndicator()
+            : ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState.validate()) {
+                    context.read<LoginBloc>().add(LoginSubmitted());
+                  }
+                },
+                child: Text("Login"),
+              );
+      },
     );
   }
 }
